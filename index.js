@@ -1,7 +1,7 @@
 import axios from 'axios';
 import ical from 'ical.js';
 
-import fs from 'fs';
+import fs from 'fs-extra';
 import {google} from 'googleapis';
 import authorize from './calendarAuthenticator';
 
@@ -39,11 +39,12 @@ const insertEvent = (auth, event) => {
     });
 };
 
-
-fs.readFile('.credentials/client_secret.json', async (err, content) => {
-    if (err) {
+let sync = async () => {
+    let content;
+    try {
+        content = await fs.readFile('.credentials/client_secret.json');
+    } catch (err) {
         console.log('Error loading client secret file: ' + err);
-        return;
     }
 
     let auth = await authorize(JSON.parse(content));
@@ -69,6 +70,9 @@ fs.readFile('.credentials/client_secret.json', async (err, content) => {
                 // let createdEvent = await insertEvent(auth, googleEvent);
                 console.log("done");
             }
-
         });
-});
+};
+
+if (require.main === module) {
+    sync();
+}
